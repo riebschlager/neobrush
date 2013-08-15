@@ -36,9 +36,9 @@ class  SketchLine {
     }
     beginShape();
     for (int i = 0; i < numberOfPoints; i++) {
-      strokeWeight(0.5);
-      stroke(src.get((int) points[i].x, (int) points[i].y), 60);
-      if (random(1) > 0.95) stroke(0, 60);
+      strokeWeight(1.5);
+      stroke(src.get((int) points[i].x, (int) points[i].y), 50);
+      //if (random(1) > 0.95) stroke(0, 60);
       curveVertex(points[i].x, points[i].y);
     }
     endShape();
