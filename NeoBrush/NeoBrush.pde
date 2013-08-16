@@ -1,15 +1,11 @@
-SketchLine[] lines = new SketchLine[100];
+SketchLine[] lines = new SketchLine[50];
 PImage src;
 int videoFrame = 0;
 
 void setup() {
-
-  src = loadImage("http://img.ffffound.com/static-data/assets/6/4e4eb75891ed176d307d84d3a3506f70a001bd20_m.jpg");
-  src.resize(src.width * 2, src.height * 2);
-  size(src.width, src.height);
-  for (int i = 0; i < lines.length; i++) {
-    lines[i] = new SketchLine((int) random(5, 40), random(0.1, 0.4), random(0.5, 0.75));
-  }
+  size(1280, 720);
+  src = loadImage("http://img.ffffound.com/static-data/assets/6/ff6788911ac9b76ad2b15d62672759e79c9c9c01_m.jpg");
+  src.resize(width, height);
   background(0);
   noFill();
 }
@@ -17,6 +13,7 @@ void setup() {
 void draw() {
   if (mousePressed) { 
     for (int i = 0; i < lines.length; i++) {
+      lines[i].update();
       lines[i].render();
     }
     //saveFrameForVideo();
@@ -31,6 +28,7 @@ void saveFrameForVideo() {
 
 void mousePressed() {
   for (int i = 0; i < lines.length; i++) {
+    lines[i] = new SketchLine(10, random(0.075), random(0.75));
     lines[i].reset();
   }
 }
