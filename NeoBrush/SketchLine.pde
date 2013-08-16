@@ -1,47 +1,40 @@
 class  SketchLine {
 
-  int vertices;
-  PVector[] startPoints, deltas, endPoints;
+  int numberOfVertices;
+  PVector[] curveVertices, distances, endPoints;
   float easeFactor, speedFactor;
 
-  SketchLine(int _vertices, float _easeFactor, float _speedFactor) {
-    vertices = _vertices;
+  SketchLine(int _numberOfVertices, float _easeFactor, float _speedFactor) {
+    numberOfVertices = _numberOfVertices;
     easeFactor = _easeFactor;
     speedFactor = _speedFactor;
-    startPoints = new PVector[vertices];
-    deltas = new PVector[vertices];
-    endPoints = new PVector[vertices];
-  }
-
-  void reset() {
-    for (int i = 0; i < vertices; i++) {
-      startPoints[i] = new PVector(mouseX, mouseY);
-      deltas[i] = new PVector();
+    curveVertices = new PVector[numberOfVertices];
+    distances = new PVector[numberOfVertices];
+    endPoints = new PVector[numberOfVertices];
+    for (int i = 0; i < numberOfVertices; i++) {
+      curveVertices[i] = new PVector(mouseX, mouseY);
+      distances[i] = new PVector();
       endPoints[i] = new PVector();
     }
   }
 
   void update() {    
-    for (int i = 0; i < vertices; i++) {
-      deltas[i].x = (i == 0) ? mouseX - startPoints[i].x : startPoints[i-1].x - startPoints[i].x;
-      deltas[i].y = (i == 0) ? mouseY - startPoints[i].y : startPoints[i-1].y - startPoints[i].y;
-      deltas[i].mult(easeFactor);
-      endPoints[i].add(deltas[i]);
-      startPoints[i].add(endPoints[i]);
+    for (int i = 0; i < numberOfVertices; i++) {
+      distances[i].x = (i == 0) ? mouseX - curveVertices[0].x : curveVertices[i-1].x - curveVertices[i].x;
+      distances[i].y = (i == 0) ? mouseY - curveVertices[0].y : curveVertices[i-1].y - curveVertices[i].y;
+      distances[i].mult(easeFactor);
+      endPoints[i].add(distances[i]);
+      curveVertices[i].add(endPoints[i]);
       endPoints[i].mult(speedFactor);
     }
   }
 
-  void render() { 
+  void render() {
     beginShape();
-    for (int i = 0; i < vertices; i++) {
-      strokeWeight(1);
-      stroke(src.get((int) startPoints[i].x, (int) startPoints[i].y), 30);
-      if (random(1) > 0.95) {
-        strokeWeight(0.1);
-        stroke(0);
-      }
-      curveVertex(startPoints[i].x, startPoints[i].y);
+    for (int i = 0; i < numberOfVertices; i++) {
+      strokeWeight(0.5);
+      stroke(src.get((int) curveVertices[i].x, (int) curveVertices[i].y), 50);
+      curveVertex(curveVertices[i].x, curveVertices[i].y);
     }
     endShape();
   }
