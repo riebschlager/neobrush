@@ -1,13 +1,3 @@
-//float lineWeight = 1.5f;
-//float lineAlpha = 50f;
-//float easeMin = 0.01f;
-//float easeMax = 0.05f;
-//float speedMin = 0.1f;
-//float speedMax = 0.9f;
-//int numberOfLines = 100;
-//int numberOfVerticesMin = 4;
-//int numberOfVerticesMax = 100;
-
 class ControlPanel {
 
   ControlP5 cp5;
@@ -33,5 +23,6 @@ class ControlPanel {
     if (cp5.isVisible()) cp5.hide();
     else cp5.show();
   }
+  
 }
 

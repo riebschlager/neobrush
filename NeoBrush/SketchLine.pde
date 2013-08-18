@@ -37,7 +37,7 @@ class SketchLine {
       canvas.noFill();
       canvas.strokeWeight(lineWeight);
       int r = floor(numberOfVertices / 2);
-      int c = src.get((int) constrain(curveVertices[r].x, 0, src.width), (int) constrain(curveVertices[r].y, 0, src.height));
+      int c = src.get((int) constrain(curveVertices[r].x, 0, src.width - 1), (int) constrain(curveVertices[r].y, 0, src.height - 1));
       canvas.stroke(c, lineAlpha);
       canvas.curveVertex(curveVertices[i].x, curveVertices[i].y);
     }
