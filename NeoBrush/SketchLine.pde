@@ -1,4 +1,4 @@
-class  SketchLine {
+class SketchLine {
 
   int numberOfVertices;
   PVector[] curveVertices, distances, endPoints;
@@ -12,7 +12,7 @@ class  SketchLine {
     distances = new PVector[numberOfVertices];
     endPoints = new PVector[numberOfVertices];
     for (int i = 0; i < numberOfVertices; i++) {
-      curveVertices[i] = new PVector(mouseX, mouseY);
+      curveVertices[i] = new PVector(map(mouseX, 0, width, 0, src.width), map(mouseY, 0, height, 0, src.height));
       distances[i] = new PVector();
       endPoints[i] = new PVector();
     }
@@ -20,8 +20,10 @@ class  SketchLine {
 
   void update() {    
     for (int i = 0; i < numberOfVertices; i++) {
-      distances[i].x = (i == 0) ? mouseX - curveVertices[0].x : curveVertices[i-1].x - curveVertices[i].x;
-      distances[i].y = (i == 0) ? mouseY - curveVertices[0].y : curveVertices[i-1].y - curveVertices[i].y;
+      float mappedMouseX = map(mouseX, 0, width, 0, src.width);
+      float mappedMouseY = map(mouseY, 0, height, 0, src.height);
+      distances[i].x = (i == 0) ? mappedMouseX - curveVertices[0].x : curveVertices[i-1].x - curveVertices[i].x;
+      distances[i].y = (i == 0) ? mappedMouseY - curveVertices[0].y : curveVertices[i-1].y - curveVertices[i].y;
       distances[i].mult(easeFactor);
       endPoints[i].add(distances[i]);
       curveVertices[i].add(endPoints[i]);
@@ -30,13 +32,16 @@ class  SketchLine {
   }
 
   void render() {
-    beginShape();
+    canvas.beginShape();
     for (int i = 0; i < numberOfVertices; i++) {
-      strokeWeight(0.5);
-      stroke(src.get((int) curveVertices[i].x, (int) curveVertices[i].y), 50);
-      curveVertex(curveVertices[i].x, curveVertices[i].y);
+      canvas.noFill();
+      canvas.strokeWeight(lineWeight);
+      int r = floor(numberOfVertices / 2);
+      int c = src.get((int) constrain(curveVertices[r].x, 0, src.width), (int) constrain(curveVertices[r].y, 0, src.height));
+      canvas.stroke(c, lineAlpha);
+      canvas.curveVertex(curveVertices[i].x, curveVertices[i].y);
     }
-    endShape();
+    canvas.endShape();
   }
 }
 

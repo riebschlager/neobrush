@@ -1,31 +1,58 @@
 import java.util.*;
+import controlP5.*;
 
-int numberOfLines = 100;
 ArrayList<SketchLine> lines = new ArrayList<SketchLine>();
 PImage src;
 int videoFrame = 0;
+ControlPanel controlPanel;
+PGraphics canvas;
+boolean showSource = false;
+
+// The Tweakables
+
+float lineWeight = 1f;
+float lineAlpha = 100f;
+float easeMin = 0.01f;
+float easeMax = 0.5f;
+float speedMin = 0.5f;
+float speedMax = 0.75f;
+int numberOfLines = 100;
+int numberOfVerticesMin = 5;
+int numberOfVerticesMax = 10;
 
 void setup() {
-  size(1280, 720);
-  src = loadImage("http://24.media.tumblr.com/3a6f7196adf7bac67abf36f9dbfdd836/tumblr_mrmy0moOEa1qz6f9yo1_500.jpg");
-  src.resize(width, height);
+  src = loadImage("http://a1.s6img.com/cdn/box_005/post_15/701220_4692744_lz.jpg");
+  src.resize(src.width * 3, src.height * 3);
+  size(src.width/2, src.height/2);
   background(0);
-  noFill();
+  controlPanel = new ControlPanel(this);
+  canvas = createGraphics(src.width, src.height);
+  canvas.beginDraw();
+  canvas.clear();
+  canvas.endDraw();
 }
 
 void draw() {
-  if (mousePressed) { 
+  background(0);
+
+
+  if (showSource) image(src, 0, 0, width, height);
+
+  image(canvas, 0, 0, width, height);
+  if (mousePressed && !controlPanel.cp5.isVisible()) { 
+    canvas.beginDraw();
     for (SketchLine line : lines) {
       line.update();
       line.render();
     }
+    canvas.endDraw();
     //saveFrameForVideo();
   }
 }
 
 void mousePressed() {
   for (int i = 0; i < numberOfLines; i++) {
-    lines.add(new SketchLine(10, 0.05 + random(-0.01, 0.01), 0.5  + random(-0.2, 0.2)));
+    lines.add(new SketchLine(ceil(random(numberOfVerticesMin, numberOfVerticesMax)), random(easeMin, easeMax), random(speedMin, speedMax)));
   }
 }
 
@@ -35,12 +62,20 @@ void mouseReleased() {
 
 void keyPressed() {
   if (key == ' ') {
-    background(0);
+    canvas.beginDraw();
+    canvas.clear();
+    canvas.endDraw();
   }
   if (key == 's') {
     String fileName = "data/output/composition-" + month() + "-" + day() + "-" + hour() + "-" + minute() + "-" + second() + ".png";
-    save(fileName);
+    canvas.save(fileName);
     println("Saved: " + fileName);
+  }
+  if (key == 'c') {
+    controlPanel.toggle();
+  }
+  if (key == 'z') {
+    showSource = !showSource;
   }
 }
 
