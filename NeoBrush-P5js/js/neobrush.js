@@ -1,135 +1,101 @@
 'use strict';
 
-$(function() {
-    $('a.color-source').click(function(event) {
-        event.preventDefault();
-        $('a.color-source').removeClass('active');
-        $(this).addClass('active');
-        updateSource($(this).index() + 1);
-    });
-    $('.preset').click(function(event) {
-        event.preventDefault();
-        choosePreset($(this).index());
-    });
-});
+function SketchLine(numberOfVertices, easeFactor, speedFactor, colors, p, art) {
 
-var lines = [];
-var colors = [];
-var src, canvas, art;
-var ui = {};
+  var curveVertices = [];
+  var distances = [];
+  var endPoints = [];
+  var colorIndex = 0;
 
-function choosePreset(id) {
-    switch (id) {
-        case 0:
-            ui.numberOfLines.value(100);
-            ui.easing.value(0.25);
-            ui.easingJitter.value(0.1);
-            ui.speed.value(0.3);
-            ui.speedJitter.value(0.1);
-            ui.vertices.value(8);
-            ui.verticesJitter.value(1);
-            break;
-        case 1:
-            ui.numberOfLines.value(11);
-            ui.easing.value(0.1);
-            ui.easingJitter.value(0);
-            ui.speed.value(0.1);
-            ui.speedJitter.value(0);
-            ui.vertices.value(30);
-            ui.verticesJitter.value(1);
-            break;
-        case 2:
-            ui.numberOfLines.value(10);
-            ui.easing.value(0.67);
-            ui.easingJitter.value(0);
-            ui.speed.value(0.18);
-            ui.speedJitter.value(0.1);
-            ui.vertices.value(25);
-            ui.verticesJitter.value(4);
-            break;
-        case 3:
-            ui.numberOfLines.value(25);
-            ui.easing.value(0.42);
-            ui.easingJitter.value(0.1);
-            ui.speed.value(0.45);
-            ui.speedJitter.value(0.02);
-            ui.vertices.value(8);
-            ui.verticesJitter.value(1);
-            break;
-        case 4:
-            ui.numberOfLines.value(200);
-            ui.easing.value(0.28);
-            ui.easingJitter.value(0.19);
-            ui.speed.value(0.12);
-            ui.speedJitter.value(0.47);
-            ui.vertices.value(11);
-            ui.verticesJitter.value(2);
-            break;
+  for (var i = 0; i < numberOfVertices; i++) {
+    curveVertices[i] = p.createVector(p.mouseX, p.mouseY);
+    distances[i] = p.createVector(0, 0);
+    endPoints[i] = p.createVector(0, 0);
+  }
+
+  this.update = function() {
+    colorIndex = (colorIndex < colors.length) ? colorIndex + 1 : 0;
+    for (var i = 0; i < numberOfVertices; i++) {
+      distances[i].x = (i === 0) ? p.mouseX - curveVertices[0].x : curveVertices[i - 1].x - curveVertices[i].x;
+      distances[i].y = (i === 0) ? p.mouseY - curveVertices[0].y : curveVertices[i - 1].y - curveVertices[i].y;
+      distances[i].mult(easeFactor);
+      endPoints[i].add(distances[i]);
+      curveVertices[i].add(endPoints[i]);
+      endPoints[i].mult(speedFactor);
     }
+  };
+
+  this.render = function() {
+    art.beginShape();
+    for (var i = 0; i < numberOfVertices; i++) {
+      art.noFill();
+      art.strokeWeight(1);
+      var c = colors[colorIndex];
+      art.stroke(c[0], c[1], c[2], 30);
+      art.curveVertex(curveVertices[i].x, curveVertices[i].y);
+    }
+    art.endShape();
+  };
 }
 
-function setup() {
-    background(0);
-    updateSource(1);
-    canvas = createCanvas(975, 700);
+var s = function(p) {
+
+  var lines = [];
+  var colors = [];
+  var src, canvas, art;
+
+  p.clearme = function() {
+    art.background(0);
+  };
+
+  p.saveme = function() {
+    art.get().save('png');
+  };
+
+  p.updateSource = function(colorSource) {
+    colors = [];
+    src = p.loadImage(colorSource, function(img) {
+      for (var x = 0; x < src.width; x++) {
+        for (var y = 0; y < src.height; y++) {
+          colors.push(img.get(x, y));
+        }
+      }
+    });
+  };
+
+  p.mousePressed = function() {
+    for (var i = 0; i < p.ui.numberOfLines; i++) {
+      var easing = p.ui.easing + p.random(-p.ui.easingJitter, p.ui.easingJitter);
+      var speed = p.ui.speed + p.random(-p.ui.speedJitter, p.ui.speedJitter);
+      var vertices = p.ui.vertices + p.random(-p.ui.verticesJitter, p.ui.verticesJitter);
+      var line = new SketchLine(vertices, easing, speed, colors, p, art);
+      lines.push(line);
+    }
+  };
+
+  p.mouseReleased = function() {
+    lines = [];
+  };
+
+  p.setup = function() {
+    p.pixelDensity(1);
+    p.background(0);
+    p.updateSource('img/source-0.jpg');
+    canvas = p.createCanvas(975, 700);
     canvas.parent('neobrush');
 
-    art = createGraphics(canvas.width, canvas.height);
+    art = p.createGraphics(canvas.width, canvas.height);
     art.background(0);
+  };
 
-    ui.numberOfLines = getElement('number-of-lines');
-    ui.easing = getElement('easing');
-    ui.easingJitter = getElement('easing-jitter');
-    ui.speed = getElement('speed');
-    ui.speedJitter = getElement('speed-jitter');
-    ui.vertices = getElement('vertices');
-    ui.verticesJitter = getElement('vertices-jitter');
-    ui.clear = getElement('clear');
-    ui.clear.mousePressed(clearme);
-    ui.save = getElement('save');
-    ui.save.mousePressed(saveme);
-
-    ui.preset = getElement('save-preset');
-}
-
-function draw() {
-    background(0);
+  p.draw = function() {
+    p.background(0);
     for (var i = 0; i < lines.length; i++) {
-        lines[i].update();
-        lines[i].render();
+      lines[i].update();
+      lines[i].render();
     }
-    image(art, 0, 0, canvas.width, canvas.height);
-}
+    p.image(art, 0, 0, canvas.width, canvas.height);
+  };
+};
 
-function updateSource(index) {
-    colors = [];
-    src = loadImage('img/source-' + index + '.jpg', function(img) {
-        for (var x = 0; x < src.width; x++) {
-            for (var y = 0; y < src.height; y++) {
-                colors.push(img.get(x, y));
-            }
-        }
-    });
-}
-
-function mousePressed() {
-    for (var i = 0; i < ui.numberOfLines.value(); i++) {
-        var easing = ui.easing.value() + random(-ui.easingJitter.value(), ui.easingJitter.value());
-        var speed = ui.speed.value() + random(-ui.speedJitter.value(), ui.speedJitter.value());
-        var vertices = ui.vertices.value() + random(-ui.verticesJitter.value(), ui.verticesJitter.value());
-        var line = new SketchLine(vertices, easing, speed, colors);
-        lines.push(line);
-    }
-}
-
-function mouseReleased() {
-    lines = [];
-}
-
-function clearme() {
-    art.background(0);
-}
-
-function saveme() {
-    art.get().save('png');
-}
+var sketch = new p5(s);

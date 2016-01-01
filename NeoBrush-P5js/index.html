@@ -1,81 +1,83 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NeoBrush</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/main.css">
-  <script src="js/jquery.min.js"></script>
-  <script src="js/underscore-min.js"></script>
-  <script src="js/p5.min.js"></script>
-  <script src="js/p5.dom.js"></script>
-  <script src="js/sketchline.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.8/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.20/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.20/addons/p5.dom.min.js"></script>
   <script src="js/neobrush.js"></script>
+  <script src="js/ui.js"></script>
 </head>
+
 <body>
-  <div class="container">
+  <div class="container" ng-app="UiApp" ng-controller="UiController" id="ui-app">
     <div class="row">
       <div class="col-sm-10 col-sm-offset-2">
         <h1>Neobrush</h1>
-        <h5>A <a href="http://processing.org">Processing</a> sketch by <a href="http://the816.com">Chris Riebschlager</a> which uses the hot new <a href="http://p5js.org/">P5js</a>.</h5>
+        <h5>A <a href="http://p5js.org/">p5.js</a> sketch by <a href="http://the816.com">Chris Riebschlager</a></h5>
       </div>
     </div>
     <div class="row">
       <div class="col-sm-2">
         <p>Color Source:</p>
         <div class="margin-bottom">
-          <a class="color-source active" href=""><img src="img/source-1.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-2.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-3.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-4.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-5.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-6.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-7.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-8.jpg" alt="" class="img-circle"></a>
-          <a class="color-source" href=""><img src="img/source-9.jpg" alt="" class="img-circle"></a>
+          <a ng-class="{'active':activeColorSource==colorSource}" ng-repeat="colorSource in colorSources" class="color-source" href="" ng-click="setColorSource(colorSource)">
+            <img src="" ng-src="{{colorSource}}" alt="" class="img-circle">
+          </a>
         </div>
         <p>Presets:</p>
         <div>
-          <button class="btn btn-info btn-xs preset">Brushy</button>
-          <button class="btn btn-info btn-xs preset">Stripey</button>
-          <button class="btn btn-info btn-xs preset">Thin</button>
-          <button class="btn btn-info btn-xs preset">Fuzzy</button>
-          <button class="btn btn-info btn-xs preset">Nutso</button>
+          <button ng-click="choosePreset(preset)" ng-repeat="preset in presets" class="btn btn-info btn-xs preset">{{preset.name}}</button>
         </div>
         <p>
-          Number of Lines:<br>
-          <input type="range" id="number-of-lines" min="10" max="200" value="100">
+          Number of Lines:
+          <br>
+          <input ng-change="update()" ng-model="ui.numberOfLines" type="range" id="number-of-lines" min="10" max="200" value="100">
         </p>
         <p>
-          Easing:<br>
-          <input type="range" id="easing" min="0.01" max="0.99" value="0.25" step="0.01">
+          Easing:
+          <br>
+          <input ng-change="update()" ng-model="ui.easing" type="range" id="easing" min="0.01" max="0.99" value="0.25" step="0.01">
         </p>
         <p>
-          Easing Jitter:<br>
-          <input type="range" id="easing-jitter" min="0" max="0.3" value="0.1" step="0.01">
+          Easing Jitter:
+          <br>
+          <input ng-change="update()" ng-model="ui.easingJitter" type="range" id="easing-jitter" min="0" max="0.3" value="0.1" step="0.01">
         </p>
         <p>
-          Speed:<br>
-          <input type="range" id="speed" min="0.01" max="0.99" value="0.3" step="0.01">
+          Speed:
+          <br>
+          <input ng-change="update()" ng-model="ui.speed" type="range" id="speed" min="0.01" max="0.99" value="0.3" step="0.01">
         </p>
         <p>
-          Speed Jitter:<br>
-          <input type="range" id="speed-jitter" min="0" max="0.99" value="0.1" step="0.01">
+          Speed Jitter:
+          <br>
+          <input ng-change="update()" ng-model="ui.speedJitter" type="range" id="speed-jitter" min="0" max="0.99" value="0.1" step="0.01">
         </p>
         <p>
-          Verticies:<br>
-          <input type="range" id="vertices" min="1" max="30" value="8" step="1">
+          Verticies:
+          <br>
+          <input ng-change="update()" ng-model="ui.verticies" type="range" id="vertices" min="1" max="30" value="8" step="1">
         </p>
         <p class="margin-bottom">
-          Verticies Jitter:<br>
-          <input type="range" id="vertices-jitter" min="0" max="10" value="1" step="1">
+          Verticies Jitter:
+          <br>
+          <input ng-change="update()" ng-model="ui.verticiesJitter" type="range" id="vertices-jitter" min="0" max="10" value="1" step="1">
         </p>
-        <button id="save" class="btn btn-sm btn-primary">Save</button>
-        <button id="clear" class="btn btn-sm btn-warning">Clear</button>
+        <button ng-click="sketch.saveme()" class="btn btn-sm btn-primary">Save</button>
+        <button ng-click="sketch.clearme()" class="btn btn-sm btn-warning">Clear</button>
       </div>
       <div class="col-sm-10" id="neobrush"></div>
     </div>
   </div>
 </body>
+
 </html>
