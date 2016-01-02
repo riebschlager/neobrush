@@ -1,4 +1,3 @@
-import java.util.*;
 import controlP5.*;
 
 ArrayList<SketchLine> lines = new ArrayList<SketchLine>();
@@ -7,8 +6,6 @@ int videoFrame = 0;
 ControlPanel controlPanel;
 PGraphics canvas;
 boolean showSource = false;
-
-// The Tweakables
 
 float lineWeight = 1f;
 float lineAlpha = 100f;
@@ -21,10 +18,10 @@ int numberOfVerticesMin = 5;
 int numberOfVerticesMax = 10;
 
 void setup() {
-  src = loadImage("http://img.ffffound.com/static-data/assets/6/6c74350682d537dd3f0edc8dca406c61db3ef07e_m.jpg");
-  src.resize(src.width * 3, src.height * 3);
-  size(src.width / 2, src.height / 2);
+  size(1920, 1080);
+  pixelDensity(1);
   background(0);
+  src = loadImage("photo.jpg");
   controlPanel = new ControlPanel(this);
   canvas = createGraphics(src.width, src.height);
   canvas.beginDraw();
@@ -43,7 +40,6 @@ void draw() {
       line.render();
     }
     canvas.endDraw();
-    //saveFrameForVideo();
   }
 }
 
@@ -75,10 +71,3 @@ void keyPressed() {
     showSource = !showSource;
   }
 }
-
-void saveFrameForVideo() {
-  String index = nf(videoFrame, 5);
-  saveFrame("data/video/" + index + ".tif");
-  videoFrame++;
-}
-
