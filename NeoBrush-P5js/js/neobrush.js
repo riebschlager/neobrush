@@ -49,7 +49,7 @@ var s = function(p) {
   };
 
   p.saveme = function() {
-    art.get().save('png');
+    art.get().save('neobrush-' + Date.now() + '.png');
   };
 
   p.updateSource = function(colorSource) {
