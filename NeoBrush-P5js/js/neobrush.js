@@ -31,7 +31,11 @@ function SketchLine(numberOfVertices, easeFactor, speedFactor, colors, p, art) {
       art.noFill();
       art.strokeWeight(1);
       var c = colors[colorIndex];
-      art.stroke(c[0], c[1], c[2], 30);
+      art.blendMode(art.ADD);
+      if (p.random(1) > 0.5) {
+        art.blendMode(art.BLEND);
+      }
+      art.stroke(c[0], c[1], c[2], 255 / 20);
       art.curveVertex(curveVertices[i].x, curveVertices[i].y);
     }
     art.endShape();
@@ -45,6 +49,7 @@ var s = function(p) {
   var src, canvas, art;
 
   p.clearme = function() {
+    art.clear();
     art.background(0);
   };
 
@@ -81,6 +86,7 @@ var s = function(p) {
     p.pixelDensity(1);
     p.background(0);
     p.updateSource('img/source-0.jpg');
+
     canvas = p.createCanvas(975, 700);
     canvas.parent('neobrush');
 

@@ -16,7 +16,7 @@ uiApp.controller('UiController', function($scope) {
     'img/source-8.jpg'
   ];
 
-  $scope.activeColorSource =  $scope.colorSources[0];
+  $scope.activeColorSource = $scope.colorSources[0];
 
   $scope.setColorSource = function(colorSource) {
     sketch.updateSource(colorSource);
@@ -43,7 +43,7 @@ uiApp.controller('UiController', function($scope) {
     verticesJitter: 1
   }, {
     name: 'Thin',
-    numberOfLines: 10,
+    numberOfLines: 30,
     easing: 0.67,
     easingJitter: 0,
     speed: 0.18,
