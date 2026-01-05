@@ -1,0 +1,29 @@
+{
+  "name": "neobrush",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "A generative art paintbrush that creates organic, flowing brush strokes with physics-based vertex animation",
+  "author": "Chris Riebschlager",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "pinia": "^3.0.4",
+    "sass": "^1.97.1",
+    "vite-plugin-vuetify": "^2.1.2",
+    "vue": "^3.5.24",
+    "vuetify": "^3.11.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.8.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vue-tsc": "^3.1.4"
+  }
+}

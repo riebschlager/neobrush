@@ -1,0 +1,81 @@
+// Adobe-style global styles
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', 'Adobe Clean', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Adobe-style scrollbars
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5a5a5a;
+  border-radius: 4px;
+
+  &:hover {
+    background: #6a6a6a;
+  }
+}
+
+// Panel styling
+.panel {
+  background: #2d2d2d;
+  border: 1px solid #404040;
+
+  &-header {
+    padding: 8px 12px;
+    background: #323232;
+    border-bottom: 1px solid #404040;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #b0b0b0;
+    user-select: none;
+  }
+
+  &-content {
+    padding: 12px;
+  }
+}
+
+// Adobe-style labels
+.label {
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 4px;
+  user-select: none;
+}
+
+// Divider
+.divider {
+  height: 1px;
+  background: #404040;
+  margin: 8px 0;
+}
+
+// Utility classes
+.no-select {
+  user-select: none;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
