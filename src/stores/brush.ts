@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { BrushParameters, BrushPreset, ColorSource } from '@/types'
+import type { BrushParameters, BrushPreset, GradientSource } from '@/types'
 
 const defaultParameters: BrushParameters = {
   numberOfLines: 100,
@@ -62,33 +62,41 @@ const defaultPresets: BrushPreset[] = [
   },
 ]
 
+const defaultGradients: GradientSource[] = [
+  { id: 'gradient-warm', name: 'Warm', colors: ['#f6d365', '#fda085'] },
+  { id: 'gradient-cool', name: 'Cool', colors: ['#84fab0', '#8fd3f4'] },
+  { id: 'gradient-neon', name: 'Neon', colors: ['#f857a6', '#ff5858'] },
+  { id: 'gradient-ocean', name: 'Ocean', colors: ['#2193b0', '#6dd5ed'] },
+  { id: 'gradient-forest', name: 'Forest', colors: ['#56ab2f', '#a8e063'] },
+  { id: 'gradient-sunset', name: 'Sunset', colors: ['#fa709a', '#fee140'] },
+  { id: 'gradient-dusk', name: 'Dusk', colors: ['#2b5876', '#4e4376'] },
+  { id: 'gradient-aurora', name: 'Aurora', colors: ['#00c6ff', '#0072ff'] },
+]
+
 export const useBrushStore = defineStore('brush', () => {
   // State
   const parameters = ref<BrushParameters>({ ...defaultParameters })
   const presets = ref<BrushPreset[]>([...defaultPresets])
   const activePresetId = ref<string | null>(null)
 
-  const colorSources = ref<ColorSource[]>([
-    { id: 'source-0', name: 'Warm', src: '/images/source-0.jpg' },
-    { id: 'source-1', name: 'Cool', src: '/images/source-1.jpg' },
-    { id: 'source-2', name: 'Vibrant', src: '/images/source-2.jpg' },
-    { id: 'source-3', name: 'Earth', src: '/images/source-3.jpg' },
-    { id: 'source-4', name: 'Neon', src: '/images/source-4.jpg' },
-    { id: 'source-5', name: 'Pastel', src: '/images/source-5.jpg' },
-    { id: 'source-6', name: 'Sunset', src: '/images/source-6.jpg' },
-    { id: 'source-7', name: 'Ocean', src: '/images/source-7.jpg' },
-    { id: 'source-8', name: 'Forest', src: '/images/source-8.jpg' },
-  ])
-  const activeColorSourceId = ref<string>('source-0')
+  const gradientSources = ref<GradientSource[]>([...defaultGradients])
+  const activeGradientSourceId = ref<string>('gradient-warm')
+
+  // Custom gradient state
+  const customGradientId = ref<string | null>(null)
 
   // Getters
-  const activeColorSource = computed(() =>
-    colorSources.value.find((s) => s.id === activeColorSourceId.value)
+  const activeGradientSource = computed(() =>
+    gradientSources.value.find((s) => s.id === activeGradientSourceId.value)
   )
 
   const activePreset = computed(() =>
     presets.value.find((p) => p.id === activePresetId.value)
   )
+
+  const isCustomGradient = computed(() => {
+    return activeGradientSourceId.value === customGradientId.value
+  })
 
   // Actions
   function setParameter<K extends keyof BrushParameters>(
@@ -134,8 +142,37 @@ export const useBrushStore = defineStore('brush', () => {
     }
   }
 
-  function setColorSource(sourceId: string) {
-    activeColorSourceId.value = sourceId
+  function setGradientSource(sourceId: string) {
+    activeGradientSourceId.value = sourceId
+  }
+
+  function createCustomGradient() {
+    // If a custom gradient already exists, just select it
+    if (customGradientId.value) {
+      activeGradientSourceId.value = customGradientId.value
+      return
+    }
+
+    const id = `custom-gradient-${Date.now()}`
+    const newGradient: GradientSource = {
+      id,
+      name: 'Custom',
+      colors: ['#000000', '#ffffff'],
+    }
+    gradientSources.value.push(newGradient)
+    customGradientId.value = id
+    activeGradientSourceId.value = id
+  }
+
+  function updateCustomGradientColors(colors: string[]) {
+    if (!customGradientId.value) return
+    const index = gradientSources.value.findIndex(g => g.id === customGradientId.value)
+    if (index !== -1) {
+      const source = gradientSources.value[index]
+      if (source) {
+        source.colors = [...colors]
+      }
+    }
   }
 
   function resetToDefaults() {
@@ -148,18 +185,22 @@ export const useBrushStore = defineStore('brush', () => {
     parameters,
     presets,
     activePresetId,
-    colorSources,
-    activeColorSourceId,
+    gradientSources,
+    activeGradientSourceId,
+    customGradientId,
     // Getters
-    activeColorSource,
+    activeGradientSource,
     activePreset,
+    isCustomGradient,
     // Actions
     setParameter,
     setParameters,
     applyPreset,
     savePreset,
     deletePreset,
-    setColorSource,
+    setGradientSource,
+    createCustomGradient,
+    updateCustomGradientColors,
     resetToDefaults,
   }
 })

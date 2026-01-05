@@ -20,7 +20,7 @@ type NeoBrushInstance = ReturnType<typeof createNeoBrush>
 function normalizeFileName(name: string): string {
   return name
     .trim()
-    .replace(/[\s/\\?%*:|"<>]+/g, '-')
+    .replace(/["\s/\\?%*:|"<>]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
 }
@@ -76,13 +76,12 @@ function createNeoBrush() {
   const historyStore = useHistoryStore()
   const layersStore = useLayersStore()
 
-  const { parameters, activeColorSource, activeColorSourceId } = storeToRefs(brushStore)
+  const { parameters, activeGradientSource, activeGradientSourceId } = storeToRefs(brushStore)
   const { settings, isDrawing, zoom, panX, panY } = storeToRefs(canvasStore)
   const { layers, activeLayerId } = storeToRefs(layersStore)
 
   const canvasManager = ref<CanvasManager | null>(null)
   const brush = ref<NeoBrush | null>(null)
-  const sourceImage = ref<HTMLImageElement | null>(null)
   const animationFrameId = ref<number | null>(null)
   const isInitialized = ref(false)
 
@@ -147,7 +146,7 @@ function createNeoBrush() {
 
     for (let i = layers.value.length - 1; i >= 0; i -= 1) {
       const layer = layers.value[i]
-      if (!layer.visible) continue
+      if (!layer || !layer.visible) continue
       const layerCanvas = ensureLayerCanvas(layer)
       if (!layerCanvas) continue
       ctx.globalAlpha = layer.opacity
@@ -172,7 +171,7 @@ function createNeoBrush() {
     brush.value = new NeoBrush(parameters.value)
 
     ensureAllLayerCanvases()
-    loadSourceImage()
+    updateBrushGradient()
     renderComposite()
 
     const displayCanvas = canvasManager.value.getDisplayCanvas()
@@ -188,33 +187,36 @@ function createNeoBrush() {
     isInitialized.value = true
   }
 
-  function loadSourceImage(): void {
-    if (!activeColorSource.value) return
+  function updateBrushGradient(): void {
+    if (!activeGradientSource.value || !canvasManager.value || !brush.value) return
 
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
-      sourceImage.value = img
+    const width = canvasManager.value.getWidth()
+    const height = canvasManager.value.getHeight()
+    const offscreen = new OffscreenCanvas(width, height)
+    const ctx = offscreen.getContext('2d')
+    if (!ctx) return
 
-      const tempCanvas = document.createElement('canvas')
-      tempCanvas.width = img.width
-      tempCanvas.height = img.height
-      const tempCtx = tempCanvas.getContext('2d')
-      if (tempCtx && brush.value && canvasManager.value) {
-        tempCtx.drawImage(img, 0, 0)
-
-        const scaledCanvas = document.createElement('canvas')
-        scaledCanvas.width = canvasManager.value.getWidth()
-        scaledCanvas.height = canvasManager.value.getHeight()
-        const scaledCtx = scaledCanvas.getContext('2d')
-        if (scaledCtx) {
-          scaledCtx.drawImage(img, 0, 0, scaledCanvas.width, scaledCanvas.height)
-          const imageData = scaledCtx.getImageData(0, 0, scaledCanvas.width, scaledCanvas.height)
-          brush.value.setSourceImage(imageData)
-        }
-      }
+    // Create a diagonal gradient
+    const gradient = ctx.createLinearGradient(0, 0, width, height)
+    const colors = activeGradientSource.value.colors
+    
+    if (colors.length === 0) {
+      gradient.addColorStop(0, '#000')
+      gradient.addColorStop(1, '#fff')
+    } else if (colors.length === 1 && colors[0]) {
+      gradient.addColorStop(0, colors[0])
+      gradient.addColorStop(1, colors[0])
+    } else {
+      colors.forEach((color, index) => {
+        gradient.addColorStop(index / (colors.length - 1), color)
+      })
     }
-    img.src = activeColorSource.value.src
+
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, width, height)
+    
+    const imageData = ctx.getImageData(0, 0, width, height)
+    brush.value.setSourceImage(imageData)
   }
 
   function handleMouseDown(e: MouseEvent): void {
@@ -402,7 +404,7 @@ function createNeoBrush() {
       layers: serializedLayers,
       brushParameters: { ...parameters.value },
       activeLayerId: resolvedActiveLayerId,
-      activeColorSourceId: activeColorSourceId.value,
+      activeGradientSourceId: activeGradientSourceId.value,
     }
 
     const blob = new Blob([JSON.stringify(project, null, 2)], {
@@ -438,8 +440,8 @@ function createNeoBrush() {
     canvasStore.setBackgroundColor(project.canvas.backgroundColor)
     brushStore.setParameters(project.brushParameters)
 
-    if (project.activeColorSourceId) {
-      brushStore.setColorSource(project.activeColorSourceId)
+    if (project.activeGradientSourceId) {
+      brushStore.setGradientSource(project.activeGradientSourceId)
     }
 
     canvasManager.value.resizeDrawingCanvas(
@@ -494,7 +496,7 @@ function createNeoBrush() {
 
     renderComposite()
     historyStore.clear()
-    loadSourceImage()
+    updateBrushGradient()
   }
 
   function undo(): void {
@@ -535,9 +537,9 @@ function createNeoBrush() {
     { deep: true }
   )
 
-  watch(activeColorSource, () => {
-    loadSourceImage()
-  })
+  watch(activeGradientSource, () => {
+    updateBrushGradient()
+  }, { deep: true })
 
   watch(
     () => settings.value.backgroundColor,
@@ -565,6 +567,14 @@ function createNeoBrush() {
       renderComposite()
     },
     { deep: true }
+  )
+
+  // Watch for canvas resize to update gradient
+  watch(
+    [() => settings.value.width, () => settings.value.height],
+    () => {
+      updateBrushGradient()
+    }
   )
 
   function destroy(): void {

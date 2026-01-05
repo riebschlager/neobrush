@@ -73,7 +73,7 @@ export interface ProjectData {
   layers: SerializedLayer[]
   brushParameters: BrushParameters
   activeLayerId: string
-  activeColorSourceId?: string
+  activeGradientSourceId?: string
 }
 
 export interface SerializedLayer {
@@ -86,10 +86,9 @@ export interface SerializedLayer {
   imageData: string // base64
 }
 
-// Color source image
-export interface ColorSource {
+// Color source gradient
+export interface GradientSource {
   id: string
   name: string
-  src: string
-  thumbnail?: string
+  colors: string[]
 }
