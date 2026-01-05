@@ -2,6 +2,10 @@
 import { storeToRefs } from 'pinia'
 import { useLayersStore } from '@/stores/layers'
 
+const props = defineProps<{
+  embedded?: boolean
+}>()
+
 const layersStore = useLayersStore()
 const { layers, activeLayerId } = storeToRefs(layersStore)
 
@@ -22,8 +26,8 @@ const blendModes = [
 </script>
 
 <template>
-  <div class="panel layers-panel">
-    <div class="panel-header">
+  <div class="panel layers-panel" :class="{ embedded: props.embedded }">
+    <div v-if="!props.embedded" class="panel-header">
       <span>Layers</span>
       <div class="header-actions">
         <v-btn
@@ -38,6 +42,18 @@ const blendModes = [
       </div>
     </div>
     <div class="panel-content">
+      <div v-if="props.embedded" class="layer-toolbar">
+        <span class="toolbar-label">Layer Stack</span>
+        <v-btn
+          icon
+          variant="text"
+          size="x-small"
+          title="Add Layer"
+          @click="layersStore.createLayer()"
+        >
+          <v-icon size="16">mdi-plus</v-icon>
+        </v-btn>
+      </div>
       <!-- Layer List -->
       <div class="layer-list">
         <div
@@ -121,6 +137,17 @@ const blendModes = [
   overflow: hidden;
 }
 
+.layers-panel.embedded {
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+
+.layers-panel.embedded .panel-content {
+  padding: 0;
+  overflow: visible;
+}
+
 .panel-header {
   display: flex;
   justify-content: space-between;
@@ -136,6 +163,20 @@ const blendModes = [
   flex: 1;
   overflow-y: auto;
   padding: 12px;
+}
+
+.layer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.toolbar-label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .layer-list {

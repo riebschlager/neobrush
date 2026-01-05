@@ -3,6 +3,10 @@ import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useBrushStore } from '@/stores/brush'
 
+const props = defineProps<{
+  embedded?: boolean
+}>()
+
 const brushStore = useBrushStore()
 const { parameters, presets, activePresetId } = storeToRefs(brushStore)
 
@@ -42,8 +46,8 @@ function onPresetChange(presetId: string | null) {
 </script>
 
 <template>
-  <div class="panel properties-panel">
-    <div class="panel-header">Brush Properties</div>
+  <div class="panel properties-panel" :class="{ embedded: props.embedded }">
+    <div v-if="!props.embedded" class="panel-header">Brush Properties</div>
     <div class="panel-content">
       <!-- Presets -->
       <div class="property-group">
@@ -181,6 +185,17 @@ function onPresetChange(presetId: string | null) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.properties-panel.embedded {
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+
+.properties-panel.embedded .panel-content {
+  padding: 0;
+  overflow: visible;
 }
 
 .panel-content {

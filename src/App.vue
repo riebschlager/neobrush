@@ -3,8 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import MenuBar from '@/components/common/MenuBar.vue'
 import StatusBar from '@/components/common/StatusBar.vue'
 import ToolsPanel from '@/components/panels/ToolsPanel.vue'
-import PropertiesPanel from '@/components/panels/PropertiesPanel.vue'
-import LayersPanel from '@/components/panels/LayersPanel.vue'
+import RightPanels from '@/components/panels/RightPanels.vue'
 import CanvasViewport from '@/components/canvas/CanvasViewport.vue'
 import { useNeoBrush } from '@/composables/useNeoBrush'
 
@@ -83,14 +82,13 @@ onUnmounted(() => {
 
         <CanvasViewport />
 
-        <div class="right-panels">
-          <transition name="slide-right">
-            <PropertiesPanel v-if="showProperties" />
-          </transition>
-          <transition name="slide-right">
-            <LayersPanel v-if="showLayers" />
-          </transition>
-        </div>
+        <transition name="slide-right">
+          <RightPanels
+            v-if="showProperties || showLayers"
+            :show-properties="showProperties"
+            :show-layers="showLayers"
+          />
+        </transition>
       </div>
 
       <StatusBar />
@@ -112,16 +110,6 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   overflow: hidden;
-}
-
-.right-panels {
-  display: flex;
-  flex-direction: column;
-
-  .panel {
-    flex: 1;
-    min-height: 0;
-  }
 }
 
 // Transitions

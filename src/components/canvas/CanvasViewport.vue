@@ -109,37 +109,6 @@ watch(
         <v-progress-circular indeterminate color="primary" />
       </div>
     </div>
-    <div class="floating-controls">
-      <v-card class="controls-card" elevation="8">
-        <div class="zoom-row">
-          <v-btn icon size="small" variant="text" @click="canvasStore.zoomOut()">
-            <v-icon>mdi-minus</v-icon>
-          </v-btn>
-          <div class="zoom-label">{{ Math.round(zoom * 100) }}%</div>
-          <v-btn icon size="small" variant="text" @click="canvasStore.zoomIn()">
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
-        </div>
-        <v-slider
-          :model-value="zoom"
-          :min="0.1"
-          :max="4"
-          :step="0.05"
-          hide-details
-          density="compact"
-          @update:model-value="(value) => canvasStore.setZoom(value)"
-        />
-        <v-btn
-          size="x-small"
-          variant="outlined"
-          class="fit-btn"
-          @click="canvasStore.resetZoom()"
-        >
-          Fit to View
-        </v-btn>
-        <div class="pan-hint">Pan: Space + drag or middle mouse</div>
-      </v-card>
-    </div>
   </div>
 </template>
 
@@ -163,47 +132,5 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.floating-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.controls-card {
-  pointer-events: auto;
-  padding: 10px 12px;
-  background: rgba(32, 32, 32, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  width: 170px;
-}
-
-.zoom-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.zoom-label {
-  font-size: 12px;
-  color: #e0e0e0;
-  min-width: 52px;
-  text-align: center;
-}
-
-.fit-btn {
-  margin-top: 6px;
-  width: 100%;
-}
-
-.pan-hint {
-  margin-top: 6px;
-  font-size: 10px;
-  color: #9c9c9c;
-  text-align: center;
 }
 </style>
