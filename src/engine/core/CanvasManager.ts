@@ -13,12 +13,18 @@ export class CanvasManager {
   private height: number
   private backgroundColor: string
   private devicePixelRatio: number
+  private viewScale: number
+  private viewPanX: number
+  private viewPanY: number
 
   constructor(container: HTMLElement, options: CanvasManagerOptions) {
     this.width = options.width
     this.height = options.height
     this.backgroundColor = options.backgroundColor ?? '#000000'
     this.devicePixelRatio = window.devicePixelRatio || 1
+    this.viewScale = 1
+    this.viewPanX = 0
+    this.viewPanY = 0
 
     // Create display canvas (visible in DOM)
     this.displayCanvas = document.createElement('canvas')
@@ -63,6 +69,44 @@ export class CanvasManager {
     this.render()
   }
 
+  private getViewTransform() {
+    const container = this.displayCanvas.parentElement
+    if (!container) {
+      return {
+        displayWidth: 0,
+        displayHeight: 0,
+        scale: 1,
+        offsetX: 0,
+        offsetY: 0,
+        scaledWidth: 0,
+        scaledHeight: 0,
+      }
+    }
+
+    const rect = container.getBoundingClientRect()
+    const displayWidth = rect.width
+    const displayHeight = rect.height
+
+    const baseScale =
+      Math.min(displayWidth / this.width, displayHeight / this.height) * 0.9
+    const scale = baseScale * this.viewScale
+
+    const scaledWidth = this.width * scale
+    const scaledHeight = this.height * scale
+    const offsetX = (displayWidth - scaledWidth) / 2 + this.viewPanX
+    const offsetY = (displayHeight - scaledHeight) / 2 + this.viewPanY
+
+    return {
+      displayWidth,
+      displayHeight,
+      scale,
+      offsetX,
+      offsetY,
+      scaledWidth,
+      scaledHeight,
+    }
+  }
+
   clear(): void {
     this.drawingCtx.fillStyle = this.backgroundColor
     this.drawingCtx.fillRect(0, 0, this.width, this.height)
@@ -81,28 +125,22 @@ export class CanvasManager {
     return this.drawingCanvas
   }
 
+  setViewTransform(scale: number, panX: number, panY: number): void {
+    this.viewScale = Math.max(0.1, Math.min(10, scale))
+    this.viewPanX = panX
+    this.viewPanY = panY
+  }
+
   render(): void {
     const container = this.displayCanvas.parentElement
     if (!container) return
 
-    const rect = container.getBoundingClientRect()
-    const displayWidth = rect.width
-    const displayHeight = rect.height
+    const { displayWidth, displayHeight, scaledWidth, scaledHeight, offsetX, offsetY } =
+      this.getViewTransform()
 
     // Clear display
     this.displayCtx.fillStyle = '#1a1a1a'
     this.displayCtx.fillRect(0, 0, displayWidth, displayHeight)
-
-    // Calculate fit
-    const scale = Math.min(
-      displayWidth / this.width,
-      displayHeight / this.height
-    ) * 0.9 // 90% to leave some padding
-
-    const scaledWidth = this.width * scale
-    const scaledHeight = this.height * scale
-    const offsetX = (displayWidth - scaledWidth) / 2
-    const offsetY = (displayHeight - scaledHeight) / 2
 
     // Draw shadow
     this.displayCtx.shadowColor = 'rgba(0, 0, 0, 0.5)'
@@ -129,19 +167,7 @@ export class CanvasManager {
     const container = this.displayCanvas.parentElement
     if (!container) return { x: 0, y: 0 }
 
-    const rect = container.getBoundingClientRect()
-    const displayWidth = rect.width
-    const displayHeight = rect.height
-
-    const scale = Math.min(
-      displayWidth / this.width,
-      displayHeight / this.height
-    ) * 0.9
-
-    const scaledWidth = this.width * scale
-    const scaledHeight = this.height * scale
-    const offsetX = (displayWidth - scaledWidth) / 2
-    const offsetY = (displayHeight - scaledHeight) / 2
+    const { scale, offsetX, offsetY } = this.getViewTransform()
 
     // Get position relative to canvas element
     const canvasRect = this.displayCanvas.getBoundingClientRect()

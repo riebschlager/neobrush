@@ -77,7 +77,7 @@ function createNeoBrush() {
   const layersStore = useLayersStore()
 
   const { parameters, activeColorSource, activeColorSourceId } = storeToRefs(brushStore)
-  const { settings, isDrawing } = storeToRefs(canvasStore)
+  const { settings, isDrawing, zoom, panX, panY } = storeToRefs(canvasStore)
   const { layers, activeLayerId } = storeToRefs(layersStore)
 
   const canvasManager = ref<CanvasManager | null>(null)
@@ -167,6 +167,7 @@ function createNeoBrush() {
       height: settings.value.height,
       backgroundColor: settings.value.backgroundColor,
     })
+    canvasManager.value.setViewTransform(zoom.value, panX.value, panY.value)
 
     brush.value = new NeoBrush(parameters.value)
 
@@ -218,6 +219,7 @@ function createNeoBrush() {
 
   function handleMouseDown(e: MouseEvent): void {
     if (!canvasManager.value || !brush.value) return
+    if (typeof e.button === 'number' && e.button !== 0) return
     const activeLayer = layersStore.activeLayer
     if (!activeLayer || activeLayer.locked) return
 
@@ -543,6 +545,15 @@ function createNeoBrush() {
       if (!canvasManager.value) return
       canvasManager.value.setBackgroundColor(color)
       renderComposite()
+    }
+  )
+
+  watch(
+    [zoom, panX, panY],
+    ([nextZoom, nextPanX, nextPanY]) => {
+      if (!canvasManager.value) return
+      canvasManager.value.setViewTransform(nextZoom, nextPanX, nextPanY)
+      canvasManager.value.render()
     }
   )
 
