@@ -146,6 +146,15 @@ export const useLayersStore = defineStore('layers', () => {
     createLayer('Layer 1')
   }
 
+  function setLayers(newLayers: Layer[], activeId: string | null) {
+    layers.value = newLayers
+    if (activeId && newLayers.some((layer) => layer.id === activeId)) {
+      activeLayerId.value = activeId
+    } else {
+      activeLayerId.value = newLayers[0]?.id ?? null
+    }
+  }
+
   // Initialize with one layer
   function initialize() {
     if (layers.value.length === 0) {
@@ -177,6 +186,7 @@ export const useLayersStore = defineStore('layers', () => {
     moveLayerDown,
     setLayerCanvas,
     clearAllLayers,
+    setLayers,
     initialize,
   }
 })

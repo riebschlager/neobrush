@@ -7,14 +7,12 @@ import PropertiesPanel from '@/components/panels/PropertiesPanel.vue'
 import LayersPanel from '@/components/panels/LayersPanel.vue'
 import CanvasViewport from '@/components/canvas/CanvasViewport.vue'
 import { useNeoBrush } from '@/composables/useNeoBrush'
-import { useHistoryStore } from '@/stores/history'
 
 const showTools = ref(true)
 const showProperties = ref(true)
 const showLayers = ref(true)
 
-const { undo, redo, clearCanvas, saveImage } = useNeoBrush()
-const historyStore = useHistoryStore()
+const { undo, redo, newProject, saveImage } = useNeoBrush()
 
 function handleKeydown(e: KeyboardEvent) {
   const isMod = e.metaKey || e.ctrlKey
@@ -44,8 +42,7 @@ function handleKeydown(e: KeyboardEvent) {
   if (isMod && e.key === 'n') {
     e.preventDefault()
     if (confirm('Create a new canvas? This will clear the current artwork.')) {
-      clearCanvas()
-      historyStore.clear()
+      newProject()
     }
     return
   }

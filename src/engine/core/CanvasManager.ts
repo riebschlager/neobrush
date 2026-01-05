@@ -187,6 +187,40 @@ export class CanvasManager {
     return this.drawingCanvas.convertToBlob({ type, quality })
   }
 
+  async toBlobScaled(type = 'image/png', quality = 1, scale = 1): Promise<Blob> {
+    const safeScale = Math.max(0.1, scale)
+    if (safeScale === 1) {
+      return this.toBlob(type, quality)
+    }
+
+    const scaledWidth = Math.max(1, Math.round(this.width * safeScale))
+    const scaledHeight = Math.max(1, Math.round(this.height * safeScale))
+    const scaledCanvas = new OffscreenCanvas(scaledWidth, scaledHeight)
+    const scaledCtx = scaledCanvas.getContext('2d')
+    if (!scaledCtx) throw new Error('Failed to get scaled 2D context')
+
+    scaledCtx.imageSmoothingEnabled = true
+    scaledCtx.imageSmoothingQuality = 'high'
+    scaledCtx.drawImage(this.drawingCanvas, 0, 0, scaledWidth, scaledHeight)
+
+    return scaledCanvas.convertToBlob({ type, quality })
+  }
+
+  resizeDrawingCanvas(width: number, height: number, backgroundColor?: string): void {
+    this.width = width
+    this.height = height
+    if (backgroundColor) {
+      this.backgroundColor = backgroundColor
+    }
+
+    this.drawingCanvas = new OffscreenCanvas(this.width, this.height)
+    const drawCtx = this.drawingCanvas.getContext('2d')
+    if (!drawCtx) throw new Error('Failed to get offscreen 2D context')
+    this.drawingCtx = drawCtx
+
+    this.clear()
+  }
+
   getWidth(): number {
     return this.width
   }

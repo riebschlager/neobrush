@@ -73,6 +73,7 @@ export interface ProjectData {
   layers: SerializedLayer[]
   brushParameters: BrushParameters
   activeLayerId: string
+  activeColorSourceId?: string
 }
 
 export interface SerializedLayer {
