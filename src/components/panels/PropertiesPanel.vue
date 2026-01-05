@@ -14,6 +14,16 @@ const presetItems = computed(() =>
   presets.value.map((p) => ({ title: p.name, value: p.id }))
 )
 
+const helpText = {
+  preset: 'Quick starting points. Changing sliders will switch to Custom.',
+  lines: 'More lines = denser, fuller strokes.',
+  weight: 'Thickness of each strand.',
+  opacity: 'Lower opacity builds softer, layered marks.',
+  easing: 'How quickly the stroke follows your input.',
+  speed: 'Motion jitter per line; higher = more lively.',
+  vertices: 'More vertices = smoother curves, fewer = angular.',
+}
+
 const easeRange = computed({
   get: () => [parameters.value.easeMin, parameters.value.easeMax],
   set: (val: number[]) => {
@@ -51,7 +61,12 @@ function onPresetChange(presetId: string | null) {
     <div class="panel-content">
       <!-- Presets -->
       <div class="property-group">
-        <div class="label">Preset</div>
+        <v-tooltip location="top">
+          <template #activator="{ props: tooltipProps }">
+            <div class="label tooltip-label" v-bind="tooltipProps">Preset</div>
+          </template>
+          <span>{{ helpText.preset }}</span>
+        </v-tooltip>
         <v-select
           :model-value="activePresetId"
           :items="presetItems"
@@ -68,7 +83,12 @@ function onPresetChange(presetId: string | null) {
       <!-- Number of Lines -->
       <div class="property-group">
         <div class="property-header">
-          <span class="label">Number of Lines</span>
+          <v-tooltip location="top">
+            <template #activator="{ props: tooltipProps }">
+              <span class="label tooltip-label" v-bind="tooltipProps">Number of Lines</span>
+            </template>
+            <span>{{ helpText.lines }}</span>
+          </v-tooltip>
           <span class="value">{{ parameters.numberOfLines }}</span>
         </div>
         <v-slider
@@ -84,7 +104,12 @@ function onPresetChange(presetId: string | null) {
       <!-- Line Weight -->
       <div class="property-group">
         <div class="property-header">
-          <span class="label">Line Weight</span>
+          <v-tooltip location="top">
+            <template #activator="{ props: tooltipProps }">
+              <span class="label tooltip-label" v-bind="tooltipProps">Line Weight</span>
+            </template>
+            <span>{{ helpText.weight }}</span>
+          </v-tooltip>
           <span class="value">{{ parameters.lineWeight.toFixed(1) }}</span>
         </div>
         <v-slider
@@ -100,7 +125,12 @@ function onPresetChange(presetId: string | null) {
       <!-- Line Alpha -->
       <div class="property-group">
         <div class="property-header">
-          <span class="label">Opacity</span>
+          <v-tooltip location="top">
+            <template #activator="{ props: tooltipProps }">
+              <span class="label tooltip-label" v-bind="tooltipProps">Opacity</span>
+            </template>
+            <span>{{ helpText.opacity }}</span>
+          </v-tooltip>
           <span class="value">{{ Math.round(parameters.lineAlpha) }}</span>
         </div>
         <v-slider
@@ -118,7 +148,12 @@ function onPresetChange(presetId: string | null) {
       <!-- Ease Range -->
       <div class="property-group">
         <div class="property-header">
-          <span class="label">Easing</span>
+          <v-tooltip location="top">
+            <template #activator="{ props: tooltipProps }">
+              <span class="label tooltip-label" v-bind="tooltipProps">Easing</span>
+            </template>
+            <span>{{ helpText.easing }}</span>
+          </v-tooltip>
           <span class="value">{{ parameters.easeMin.toFixed(3) }} - {{ parameters.easeMax.toFixed(3) }}</span>
         </div>
         <v-range-slider
@@ -134,7 +169,12 @@ function onPresetChange(presetId: string | null) {
       <!-- Speed Range -->
       <div class="property-group">
         <div class="property-header">
-          <span class="label">Speed</span>
+          <v-tooltip location="top">
+            <template #activator="{ props: tooltipProps }">
+              <span class="label tooltip-label" v-bind="tooltipProps">Speed</span>
+            </template>
+            <span>{{ helpText.speed }}</span>
+          </v-tooltip>
           <span class="value">{{ parameters.speedMin.toFixed(2) }} - {{ parameters.speedMax.toFixed(2) }}</span>
         </div>
         <v-range-slider
@@ -150,7 +190,12 @@ function onPresetChange(presetId: string | null) {
       <!-- Vertices Range -->
       <div class="property-group">
         <div class="property-header">
-          <span class="label">Vertices</span>
+          <v-tooltip location="top">
+            <template #activator="{ props: tooltipProps }">
+              <span class="label tooltip-label" v-bind="tooltipProps">Vertices</span>
+            </template>
+            <span>{{ helpText.vertices }}</span>
+          </v-tooltip>
           <span class="value">{{ parameters.verticesMin }} - {{ parameters.verticesMax }}</span>
         </div>
         <v-range-slider
@@ -225,5 +270,12 @@ function onPresetChange(presetId: string | null) {
   font-size: 11px;
   color: #ccc;
   font-family: monospace;
+}
+
+.tooltip-label {
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.35);
+  cursor: help;
+  display: inline-block;
+  padding-bottom: 1px;
 }
 </style>
