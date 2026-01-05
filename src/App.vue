@@ -70,24 +70,30 @@ onUnmounted(() => {
   <v-app>
     <div class="app-layout">
       <MenuBar
+        :show-tools="showTools"
+        :show-properties="showProperties"
+        :show-layers="showLayers"
         @toggle-tools="showTools = !showTools"
         @toggle-properties="showProperties = !showProperties"
         @toggle-layers="showLayers = !showLayers"
       />
 
       <div class="main-content">
-        <transition name="slide-left">
-          <ToolsPanel v-if="showTools" />
-        </transition>
-
         <CanvasViewport />
 
+        <transition name="slide-left">
+          <div v-if="showTools" class="panel-container left">
+            <ToolsPanel />
+          </div>
+        </transition>
+
         <transition name="slide-right">
-          <RightPanels
-            v-if="showProperties || showLayers"
-            :show-properties="showProperties"
-            :show-layers="showLayers"
-          />
+          <div v-if="showProperties || showLayers" class="panel-container right">
+            <RightPanels
+              :show-properties="showProperties"
+              :show-layers="showLayers"
+            />
+          </div>
         </transition>
       </div>
 
@@ -108,8 +114,40 @@ onUnmounted(() => {
 
 .main-content {
   flex: 1;
-  display: flex;
+  position: relative; /* Ensure relative positioning for absolute children */
   overflow: hidden;
+  display: block; /* Change from flex to block so CanvasViewport fills it */
+}
+
+/* Make CanvasViewport fill the entire main-content area */
+:deep(.canvas-viewport) {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.panel-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  background: rgba(30, 30, 30, 0.95); /* Slight transparency or solid */
+  backdrop-filter: blur(10px);
+  border: 1px solid #333;
+}
+
+.panel-container.left {
+  left: 0;
+  border-right: 1px solid #333;
+}
+
+.panel-container.right {
+  right: 0;
+  border-left: 1px solid #333;
 }
 
 // Transitions
@@ -117,7 +155,7 @@ onUnmounted(() => {
 .slide-left-leave-active,
 .slide-right-enter-active,
 .slide-right-leave-active {
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
 .slide-left-enter-from,

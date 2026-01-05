@@ -1,8 +1,21 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useNeoBrush } from '@/composables/useNeoBrush'
 import { useHistoryStore } from '@/stores/history'
-import { storeToRefs } from 'pinia'
+import { useCanvasStore } from '@/stores/canvas'
+
+const props = defineProps<{
+  showTools: boolean
+  showProperties: boolean
+  showLayers: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'toggle-tools'): void
+  (e: 'toggle-properties'): void
+  (e: 'toggle-layers'): void
+}>()
 
 const {
   clearCanvas,
@@ -14,15 +27,14 @@ const {
   undo,
   redo,
 } = useNeoBrush()
+
 const historyStore = useHistoryStore()
 const { canUndo, canRedo } = storeToRefs(historyStore)
-const projectFileInput = ref<HTMLInputElement | null>(null)
 
-const emit = defineEmits<{
-  (e: 'toggle-tools'): void
-  (e: 'toggle-properties'): void
-  (e: 'toggle-layers'): void
-}>()
+const canvasStore = useCanvasStore()
+const { zoom } = storeToRefs(canvasStore)
+
+const projectFileInput = ref<HTMLInputElement | null>(null)
 
 function handleNew() {
   if (confirm('Create a new canvas? This will clear the current artwork.')) {
@@ -72,6 +84,18 @@ async function handleExportJpeg() {
   const clamped = Math.min(100, Math.max(1, value))
   await exportImage({ format: 'jpeg', quality: clamped / 100 })
 }
+
+function zoomIn() {
+  canvasStore.setZoom(zoom.value + 0.1)
+}
+
+function zoomOut() {
+  canvasStore.setZoom(Math.max(0.1, zoom.value - 0.1))
+}
+
+function zoomReset() {
+  canvasStore.setZoom(1.0)
+}
 </script>
 
 <template>
@@ -79,6 +103,7 @@ async function handleExportJpeg() {
     <div class="menu-left">
       <div class="app-title">NeoBrush</div>
 
+      <!-- File Menu -->
       <v-menu>
         <template #activator="{ props }">
           <v-btn v-bind="props" variant="text" size="small">File</v-btn>
@@ -137,6 +162,7 @@ async function handleExportJpeg() {
         </v-list>
       </v-menu>
 
+      <!-- Edit Menu -->
       <v-menu>
         <template #activator="{ props }">
           <v-btn v-bind="props" variant="text" size="small">Edit</v-btn>
@@ -170,28 +196,52 @@ async function handleExportJpeg() {
         </v-list>
       </v-menu>
 
+      <!-- View Menu -->
       <v-menu>
         <template #activator="{ props }">
           <v-btn v-bind="props" variant="text" size="small">View</v-btn>
         </template>
         <v-list density="compact" class="menu-list">
+          <!-- Panels -->
           <v-list-item @click="emit('toggle-tools')">
             <template #prepend>
-              <v-icon size="18">mdi-tools</v-icon>
+              <v-icon size="18">{{ props.showTools ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
             </template>
-            <v-list-item-title>Toggle Tools Panel</v-list-item-title>
+            <v-list-item-title>{{ props.showTools ? 'Hide' : 'Show' }} Tools Panel</v-list-item-title>
           </v-list-item>
           <v-list-item @click="emit('toggle-properties')">
             <template #prepend>
-              <v-icon size="18">mdi-tune</v-icon>
+              <v-icon size="18">{{ props.showProperties ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
             </template>
-            <v-list-item-title>Toggle Properties Panel</v-list-item-title>
+            <v-list-item-title>{{ props.showProperties ? 'Hide' : 'Show' }} Properties Panel</v-list-item-title>
           </v-list-item>
           <v-list-item @click="emit('toggle-layers')">
             <template #prepend>
-              <v-icon size="18">mdi-layers</v-icon>
+              <v-icon size="18">{{ props.showLayers ? 'mdi-eye-off' : 'mdi-eye' }}</v-icon>
             </template>
-            <v-list-item-title>Toggle Layers Panel</v-list-item-title>
+            <v-list-item-title>{{ props.showLayers ? 'Hide' : 'Show' }} Layers Panel</v-list-item-title>
+          </v-list-item>
+          
+          <v-divider />
+          
+          <!-- Zoom -->
+          <v-list-item @click="zoomIn">
+            <template #prepend>
+              <v-icon size="18">mdi-magnify-plus</v-icon>
+            </template>
+            <v-list-item-title>Zoom In</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="zoomOut">
+            <template #prepend>
+              <v-icon size="18">mdi-magnify-minus</v-icon>
+            </template>
+            <v-list-item-title>Zoom Out</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="zoomReset">
+            <template #prepend>
+              <v-icon size="18">mdi-magnify</v-icon>
+            </template>
+            <v-list-item-title>Zoom 100%</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
